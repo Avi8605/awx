@@ -1,0 +1,28 @@
+---
+- name: בדיקות מערכת כלליות
+  hosts: all
+  gather_facts: yes
+  tasks:
+
+    - name: בדיקת זמינות חיבור
+      ping:
+
+    - name: הצגת שם המארח (hostname)
+      debug:
+        msg: "המחשב נקרא {{ ansible_hostname }}"
+
+    - name: הצגת מערכת הפעלה
+      debug:
+        msg: "רץ על {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: הצגת כתובת ה-IP של המחשב
+      debug:
+        msg: "כתובת IP: {{ ansible_default_ipv4.address }}"
+
+    - name: הצגת סה״כ זיכרון RAM במגהבייט
+      debug:
+        msg: "RAM: {{ (ansible_memtotal_mb | int) }}MB"
+
+    - name: רשימת כל הדיסקים המחוברים
+      debug:
+        var: ansible_devices
