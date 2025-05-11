@@ -1,0 +1,7 @@
+---
+- name: בדיקת חיבור
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: שליחת פינג
+      ping:
