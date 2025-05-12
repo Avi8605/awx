@@ -27,7 +27,8 @@
         )
       args:
         executable: cmd
-      no_log: false
+      register: copy_setup_result
+      no_log: true
 
     - name: העתקת Office2024.xml מהשיתוף
       win_shell: |
@@ -39,14 +40,32 @@
         )
       args:
         executable: cmd
-      no_log: false
+      register: copy_xml_result
+      no_log: true
+
+    - name: בדיקה אם setup.exe קיים
+      win_stat:
+        path: "{{ dest_folder }}\\{{ setup_file }}"
+      register: setup_exists
+
+    - name: בדיקה אם Office2024.xml קיים
+      win_stat:
+        path: "{{ dest_folder }}\\{{ config_file }}"
+      register: config_exists
 
     - name: הרצת setup.exe עם קובץ ההגדרות
       win_command: "{{ dest_folder }}\\{{ setup_file }} /configure {{ dest_folder }}\\{{ config_file }}"
       args:
         chdir: "{{ dest_folder }}"
+      when: setup_exists.stat.exists and config_exists.stat.exists
       register: install_result
 
-    - name: פלט התקנה
+    - name: תצוגת הצלחה
       debug:
-        var: install_result.stdout
+        msg: "✔ ההתקנה בוצעה בתחנה {{ inventory_hostname }}"
+      when: install_result is defined and install_result.rc == 0
+
+    - name: תצוגת כישלון – קבצים חסרים
+      debug:
+        msg: "❌ הקבצים לא נמצאו בתחנה {{ inventory_hostname }} – לא בוצעה התקנה"
+      when: not (setup_exists.stat.exists and config_exists.stat.exists)
