@@ -1,32 +1,29 @@
 ---
-- name: Upgrade Office to 2024
+- name: Install Office 2024 from network share
   hosts: all
   gather_facts: no
   tasks:
 
-    - name: Create Office install directory
+    - name: Create installation directory
       win_file:
         path: C:\Office2024
         state: directory
 
-    - name: Download Office setup.exe
-      win_get_url:
-        url: "ftp://132.72.48.201/installations/Microsoft Office LTSC 2024/setup.exe"
-        dest: "C:\\Office2024\\setup.exe"
-        force: yes
+    - name: Copy Office setup.exe from network share
+      win_command: |
+        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe" "C:\Office2024\setup.exe"
 
-    - name: Download Office configuration.xml
-      win_get_url:
-        url: "ftp://132.72.48.201/installations/Microsoft Office LTSC 2024/Office2024.xml"
-        dest: "C:\\Office2024\\Office2024.xml"
-        force: yes
+    - name: Copy configuration.xml from network share
+      win_command: |
+        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\Office2024.xml" "C:\Office2024\Office2024.xml"
 
-    - name: Run Office 2024 setup with XML
+    - name: Run Office installer with config
       win_command: C:\Office2024\setup.exe /configure C:\Office2024\Office2024.xml
       args:
         chdir: C:\Office2024
-      register: office_install
+      register: office_result
 
-    - name: Show install result
+    - name: Print install result
       debug:
-        var: office_install.stdout
+        var: office_result.stdout
+
