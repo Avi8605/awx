@@ -32,11 +32,6 @@
       args:
         executable: cmd
       register: copy_debug
-      ignore_errors: true
-
-    - name: הצגת הפלט המלא מהפקודה
-      debug:
-        var: copy_debug.stdout_lines
 
     - name: בדיקת קיום קובץ ההעתקה
       win_stat:
