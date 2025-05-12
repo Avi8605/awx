@@ -1,25 +1,64 @@
 ---
-- name: Install Office from SMB using AWX Credential
+- name: התקנת Office 2024 
   hosts: all
-  gather_facts: no
+  gather_facts: false
+
+  vars:
+    share_path: "\\132.72.48.201\installations"
+    product_folder: "Microsoft Office LTSC 2024"
+    dest_folder: "C:\Office2024"
+    setup_file: "setup.exe"
+    config_file: "Office2024.xml"
+
   tasks:
 
-    - name: Ensure install folder exists
+    - name: יצירת תיקיית יעד בתחנה
       win_file:
-        path: C:\Office2024
+        path: "{{ dest_folder }}"
         state: directory
 
-    - name: Copy setup.exe
-      win_command: >
-        cmd.exe /c "net use \\132.72.48.201\installations /user:auth\\{{ ansible_user }} \"{{ ansible_password }}\" &&
-        copy \"\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe\" C:\Office2024\setup.exe"
-      
-    - name: Copy configuration.xml
-      win_command: >
-        cmd.exe /c "net use \\132.72.48.201\installations /user:auth\\{{ ansible_user }} \"{{ ansible_password }}\" &&
-        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\Office2024.xml" "C:\Office2024\Office2024.xml"
+    - name: מיפוי שיתוף והעתקת setup.exe
+      win_shell: |
+        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
+        if %ERRORLEVEL%==0 (
+          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\{{ setup_file }}"
+        ) else (
+          echo Failed to map share
+          exit /b 1
+        )
+      args:
+        executable: cmd
+      no_log: true
 
-      
-    - name: Run Office installer
-      win_command: >
-        C:\Office2024\setup.exe /configure C:\Office2024\Office2024.xml
+    - name: מיפוי שיתוף והעתקת קובץ ההתקנה XML
+      win_shell: |
+        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
+        if %ERRORLEVEL%==0 (
+          copy "{{ share_path }}\{{ product_folder }}\{{ config_file }}" "{{ dest_folder }}\{{ config_file }}"
+        ) else (
+          echo Failed to map share
+          exit /b 1
+        )
+      args:
+        executable: cmd
+      no_log: true
+
+    - name: בדיקה שהקובץ Office2024.xml קיים
+      win_stat:
+        path: "{{ dest_folder }}\{{ config_file }}"
+      register: xml_status
+
+    - name: הפסקה במקרה של העתקה כושלת
+      fail:
+        msg: "❌ הקובץ {{ config_file }} לא הועתק. בדוק את ההרשאות או הנתיב."
+      when: not xml_status.stat.exists
+
+    - name: הרצת setup.exe עם קובץ ההגדרות
+      win_command: "{{ dest_folder }}\\{{ setup_file }} /configure {{ dest_folder }}\\{{ config_file }}"
+      args:
+        chdir: "{{ dest_folder }}"
+      register: install_result
+
+    - name: תצוגת תוצאה
+      debug:
+        msg: "✔ התקנת Office 2024 הסתיימה."
