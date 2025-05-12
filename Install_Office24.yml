@@ -28,7 +28,7 @@
         )
       args:
         executable: cmd
-      no_log: true
+
 
     - name: מיפוי שיתוף והעתקת קובץ ההגדרות XML
       win_shell: |
@@ -41,7 +41,7 @@
         )
       args:
         executable: cmd
-      no_log: true
+
 
     - name: בדיקה אם Office2024.xml הועתק
       win_stat:
