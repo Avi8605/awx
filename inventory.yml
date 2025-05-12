@@ -1,44 +1,6 @@
 all:
   hosts:
-    L419LARISA.auth.ad.bgu.ac.il: 
-    shalish309.auth.ad.bgu.ac.il: 
-    KMNTSK_W10n.auth.ad.bgu.ac.il: 
-    belenky.auth.ad.bgu.ac.il: 
-    MEISHE.auth.ad.bgu.ac.il: 
-    rafishikler-w10.auth.ad.bgu.ac.il: 
-    oferW10.auth.ad.bgu.ac.il: 
-    alonk-w10.auth.ad.bgu.ac.il: 
-    boris123.auth.ad.bgu.ac.il: 
-    123-03.auth.ad.bgu.ac.il: 
-    revoh-214.auth.ad.bgu.ac.il: 
-    kobiz.auth.ad.bgu.ac.il: 
-    sarit-W10.auth.ad.bgu.ac.il: 
-    portnovW10.auth.ad.bgu.ac.il: 
-    igal123.auth.ad.bgu.ac.il: 
-    igal123-win.auth.ad.bgu.ac.il: 
-    STAS-W10.auth.ad.bgu.ac.il: 
-    disrael-tinyW10.auth.ad.bgu.ac.il: 
-    yuriy326.auth.ad.bgu.ac.il: 
-    hanokh-tinyw10.auth.ad.bgu.ac.il: 
-    arthur123.auth.ad.bgu.ac.il: 
-    maayan-w10.auth.ad.bgu.ac.il: 
-    Natan_ko.auth.ad.bgu.ac.il: 
-    vladpc-w10.auth.ad.bgu.ac.il: 
-    yafit-tiny.auth.ad.bgu.ac.il: 
-    123-david.auth.ad.bgu.ac.il: 
-    daboraW11.auth.ad.bgu.ac.il: 
-    blaunstein.auth.ad.bgu.ac.il: 
-    123-02.auth.ad.bgu.ac.il: 
-    Shlezinger-w10.auth.ad.bgu.ac.il: 
-    irena-tiny.auth.ad.bgu.ac.il: 
-    studentece.auth.ad.bgu.ac.il: 
-    secretary1-tiny.auth.ad.bgu.ac.il: 
-    Tal419.auth.ad.bgu.ac.il: 
-    dov-w10.auth.ad.bgu.ac.il: 
-    eeauth2.auth.ad.bgu.ac.il: 
-    gtelzur-w10.auth.ad.bgu.ac.il: 
-    123-01.auth.ad.bgu.ac.il: 
-    timor-w10n.auth.ad.bgu.ac.il: 
+
   vars:
     ansible_connection: winrm
     ansible_winrm_transport: basic
