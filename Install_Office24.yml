@@ -4,11 +4,11 @@
   gather_facts: false
 
   vars:
-    share_path: "\\132.72.48.201\installations"
-    product_folder: "Microsoft Office LTSC 2024"
-    dest_folder: "C:\Office2024"
-    setup_file: "setup.exe"
-    config_file: "Office2024.xml"
+    share_path: '\\132.72.48.201\installations'
+    product_folder: 'Microsoft Office LTSC 2024'
+    dest_folder: 'C:\Office2024'
+    setup_file: 'setup.exe'
+    config_file: 'Office2024.xml'
 
   tasks:
 
