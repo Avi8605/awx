@@ -1,29 +1,26 @@
 ---
-- name: Install Office 2024 from network share
+- name: Install Office from SMB using AWX Credential
   hosts: all
   gather_facts: no
   tasks:
 
-    - name: Create installation directory
+    - name: Ensure install folder exists
       win_file:
         path: C:\Office2024
         state: directory
 
-    - name: Copy Office setup.exe from network share
-      win_command: |
-        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe" "C:\Office2024\setup.exe"
+    - name: Connect to SMB share
+      win_command: >
+        net use \\132.72.48.201\installations /user:{{ ansible_user }} "{{ ansible_password }}"
 
-    - name: Copy configuration.xml from network share
-      win_command: |
-        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\Office2024.xml" "C:\Office2024\Office2024.xml"
+    - name: Copy setup.exe
+      win_command: >
+        cmd /c copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe" "C:\Office2024\setup.exe"
 
-    - name: Run Office installer with config
-      win_command: C:\Office2024\setup.exe /configure C:\Office2024\Office2024.xml
-      args:
-        chdir: C:\Office2024
-      register: office_result
+    - name: Copy configuration.xml
+      win_command: >
+        cmd /c copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\Office2024.xml" "C:\Office2024\Office2024.xml"
 
-    - name: Print install result
-      debug:
-        var: office_result.stdout
-
+    - name: Run Office installer
+      win_command: >
+        C:\Office2024\setup.exe /configure C:\Office2024\Office2024.xml
