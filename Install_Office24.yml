@@ -11,7 +11,7 @@
 
     - name: Connect to SMB share
       win_command: >
-        net use \\132.72.48.201\installations /user:.\{{ ansible_user }} "{{ ansible_password }}"
+        net use \\132.72.48.201\installations /user:auth\\{{ ansible_user }} "{{ ansible_password }}"
 
     - name: Copy setup.exe
       win_command: >
