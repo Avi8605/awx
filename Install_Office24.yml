@@ -1,5 +1,5 @@
 ---
-- name: בדיקת העתקת קובץ משיתוף רשת עם לוגים
+- name: בדיקת העתקת קובץ משיתוף רשת עם לוגים מורחבים
   hosts: all
   gather_facts: false
 
@@ -16,17 +16,17 @@
         path: "{{ dest_folder }}"
         state: directory
 
-    - name: ניסיון העתקת הקובץ עם לוגים מלאים
+    - name: ניסיון העתקת קובץ מהשיתוף עם לוגים מפורטים
       win_shell: |
         echo === התחלת בדיקה ===
-        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
-        echo ERRORLEVEL after net use: %ERRORLEVEL%
+        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}" || echo ❌ net use נכשל עם קוד %ERRORLEVEL%
+        echo ERRORLEVEL אחרי net use: %ERRORLEVEL%
         if %ERRORLEVEL%==0 (
           echo === מיפוי הצליח ===
-          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\test_copy.exe"
+          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\test_copy.exe" || echo ❌ copy נכשל עם קוד %ERRORLEVEL%
           echo קובץ הועתק בהצלחה
         ) else (
-          echo ❌ net use נכשל
+          echo ❌ net use נכשל. יציאה
           exit /b 1
         )
       args:
@@ -34,20 +34,20 @@
       register: copy_debug
       ignore_errors: true
 
-    - name: הצגת הפלט של פקודת העתקה
+    - name: הצגת הפלט המלא מהפקודה
       debug:
         var: copy_debug.stdout_lines
 
-    - name: בדיקה אם הקובץ הועתק
+    - name: בדיקת קיום קובץ ההעתקה
       win_stat:
         path: "{{ dest_folder }}\\test_copy.exe"
       register: test_file_status
 
-    - name: סיכום בדיקת ההעתקה
+    - name: סיכום
       debug:
         msg: >
           {% if test_file_status.stat.exists %}
-          ✔ הקובץ test_copy.exe הועתק בהצלחה
+          ✔ הצלחה: הקובץ test_copy.exe הועתק בהצלחה ל-{{ inventory_hostname }}
           {% else %}
-          ❌ הקובץ לא הועתק. בדוק את נתיב הקובץ, הרשאות, ו־net use.
+          ❌ כישלון: הקובץ לא הועתק ל-{{ inventory_hostname }}. יש לבדוק את השיתוף או ההרשאות.
           {% endif %}
