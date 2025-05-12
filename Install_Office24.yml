@@ -1,5 +1,5 @@
 ---
-- name: בדיקת חיבור AWX לתחנה והאם יש גישה לשיתוף הרשת
+- name: התקנת Office 2024 מהתקן רשת
   hosts: all
   gather_facts: false
 
@@ -7,53 +7,46 @@
     share_path: '\\132.72.48.201\installations'
     product_folder: 'Microsoft Office LTSC 2024'
     dest_folder: 'C:\Office2024'
-    test_file: 'setup.exe'
+    setup_file: 'setup.exe'
+    config_file: 'Office2024.xml'
 
   tasks:
 
-    - name: הצגת שם המשתמש ש־AWX מריץ איתו את הפקודות
-      win_command: whoami
-      register: whoami_result
-
-    - name: פלט whoami
-      debug:
-        msg: "AWX מריץ כ: {{ whoami_result.stdout }}"
-
-    - name: יצירת תיקיית יעד לבדיקה
+    - name: יצירת תיקיית יעד להתקנה
       win_file:
         path: "{{ dest_folder }}"
         state: directory
 
-    - name: ניסיון מיפוי שיתוף והעתקת קובץ בדיקה
+    - name: העתקת setup.exe מהשיתוף
       win_shell: |
         net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
         if %ERRORLEVEL%==0 (
-          copy "{{ share_path }}\{{ product_folder }}\{{ test_file }}" "{{ dest_folder }}\test_copy.exe"
+          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\{{ setup_file }}"
         ) else (
-          echo ❌ net use נכשל
           exit /b 1
         )
       args:
         executable: cmd
-      register: copy_test
-      ignore_errors: true
-      no_log: false  # אל תפעיל כאן no_log כדי שנראה פלט
+      no_log: false
 
-    - name: הצגת תוצאת העתקה
+    - name: העתקת Office2024.xml מהשיתוף
+      win_shell: |
+        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
+        if %ERRORLEVEL%==0 (
+          copy "{{ share_path }}\{{ product_folder }}\{{ config_file }}" "{{ dest_folder }}\{{ config_file }}"
+        ) else (
+          exit /b 1
+        )
+      args:
+        executable: cmd
+      no_log: false
+
+    - name: הרצת setup.exe עם קובץ ההגדרות
+      win_command: "{{ dest_folder }}\\{{ setup_file }} /configure {{ dest_folder }}\\{{ config_file }}"
+      args:
+        chdir: "{{ dest_folder }}"
+      register: install_result
+
+    - name: פלט התקנה
       debug:
-        var: copy_test.stdout
-
-    - name: בדיקה אם קובץ הבדיקה אכן הועתק
-      win_stat:
-        path: "{{ dest_folder }}\\test_copy.exe"
-      register: test_file_status
-
-    - name: סיכום
-      debug:
-        msg: >
-          {% if test_file_status.stat.exists %}
-          ✔ הצלחה! AWX הצליח למפות את השיתוף ולהעתיק את הקובץ.
-          {% else %}
-          ❌ נכשל להעתיק את הקובץ. ייתכן שזו בעיית הרשאות, נתיב או סביבת הרצה.
-          {% endif %}
-
+        var: install_result.stdout
