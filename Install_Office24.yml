@@ -1,5 +1,5 @@
 ---
-- name: התקנת Office 2024 מהתקן רשת
+- name: בדיקת העתקת קובץ משיתוף רשת עם לוגים
   hosts: all
   gather_facts: false
 
@@ -8,64 +8,40 @@
     product_folder: 'Microsoft Office LTSC 2024'
     dest_folder: 'C:\Office2024'
     setup_file: 'setup.exe'
-    config_file: 'Office2024.xml'
 
   tasks:
 
-    - name: יצירת תיקיית יעד להתקנה
+    - name: יצירת תיקיית יעד לבדיקה
       win_file:
         path: "{{ dest_folder }}"
         state: directory
 
-    - name: העתקת setup.exe מהשיתוף
+    - name: ניסיון העתקת הקובץ עם net use + copy (כולל echo)
       win_shell: |
+        echo === התחלת בדיקה ===
         net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
-        if %ERRORLEVEL%==0 (
-          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\{{ setup_file }}"
-        ) else (
-          exit /b 1
-        )
+        echo === מיפוי הסתיים, מתחיל העתקה ===
+        copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\test_copy.exe"
+        echo === סיום העתקה ===
       args:
         executable: cmd
-      register: copy_setup_result
-      no_log: true
+      register: copy_debug
+      ignore_errors: true
 
-    - name: העתקת Office2024.xml מהשיתוף
-      win_shell: |
-        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
-        if %ERRORLEVEL%==0 (
-          copy "{{ share_path }}\{{ product_folder }}\{{ config_file }}" "{{ dest_folder }}\{{ config_file }}"
-        ) else (
-          exit /b 1
-        )
-      args:
-        executable: cmd
-      register: copy_xml_result
-      no_log: true
-
-    - name: בדיקה אם setup.exe קיים
-      win_stat:
-        path: "{{ dest_folder }}\\{{ setup_file }}"
-      register: setup_exists
-
-    - name: בדיקה אם Office2024.xml קיים
-      win_stat:
-        path: "{{ dest_folder }}\\{{ config_file }}"
-      register: config_exists
-
-    - name: הרצת setup.exe עם קובץ ההגדרות
-      win_command: "{{ dest_folder }}\\{{ setup_file }} /configure {{ dest_folder }}\\{{ config_file }}"
-      args:
-        chdir: "{{ dest_folder }}"
-      when: setup_exists.stat.exists and config_exists.stat.exists
-      register: install_result
-
-    - name: תצוגת הצלחה
+    - name: הצגת הפלט של פקודת העתקה
       debug:
-        msg: "✔ ההתקנה בוצעה בתחנה {{ inventory_hostname }}"
-      when: install_result is defined and install_result.rc == 0
+        var: copy_debug.stdout_lines
 
-    - name: תצוגת כישלון – קבצים חסרים
+    - name: בדיקה אם הקובץ הועתק
+      win_stat:
+        path: "{{ dest_folder }}\\test_copy.exe"
+      register: test_file_status
+
+    - name: סיכום בדיקת ההעתקה
       debug:
-        msg: "❌ הקבצים לא נמצאו בתחנה {{ inventory_hostname }} – לא בוצעה התקנה"
-      when: not (setup_exists.stat.exists and config_exists.stat.exists)
+        msg: >
+          {% if test_file_status.stat.exists %}
+          ✔ הקובץ test_copy.exe הועתק בהצלחה
+          {% else %}
+          ❌ הקובץ לא הועתק. בדוק את נתיב הקובץ, הרשאות, ו־net use.
+          {% endif %}
