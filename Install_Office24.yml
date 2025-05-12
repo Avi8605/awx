@@ -11,13 +11,13 @@
 
     - name: Download Office setup.exe
       win_get_url:
-        url: "smb://132.72.48.201/installations/Microsoft Office LTSC 2024/setup.exe"
+        url: "ftp://132.72.48.201/installations/Microsoft Office LTSC 2024/setup.exe"
         dest: "C:\\Office2024\\setup.exe"
         force: yes
 
     - name: Download Office configuration.xml
       win_get_url:
-        url: "smb://132.72.48.201/installations/Microsoft Office LTSC 2024/Office2024.xml"
+        url: "ftp://132.72.48.201/installations/Microsoft Office LTSC 2024/Office2024.xml"
         dest: "C:\\Office2024\\Office2024.xml"
         force: yes
 
