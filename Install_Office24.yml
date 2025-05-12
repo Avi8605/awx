@@ -11,13 +11,12 @@
 
     - name: Copy setup.exe
       win_command: >
-        net use \\132.72.48.201\installations /user:auth\{{ ansible_user }} "{{ ansible_password }}"
-        copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe" "C:\Office2024\setup.exe"
-
+        cmd.exe /c "net use \\132.72.48.201\installations /user:auth\\{{ ansible_user }} \"{{ ansible_password }}\" &&
+        copy \"\\132.72.48.201\installations\Microsoft Office LTSC 2024\setup.exe\" C:\Office2024\setup.exe"
       
     - name: Copy configuration.xml
       win_command: >
-        net use \\132.72.48.201\installations /user:auth\{{ ansible_user }} "{{ ansible_password }}"
+        cmd.exe /c "net use \\132.72.48.201\installations /user:auth\\{{ ansible_user }} \"{{ ansible_password }}\" &&
         copy "\\132.72.48.201\installations\Microsoft Office LTSC 2024\Office2024.xml" "C:\Office2024\Office2024.xml"
 
       
