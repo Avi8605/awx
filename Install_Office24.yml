@@ -16,19 +16,19 @@
         path: "{{ dest_folder }}"
         state: directory
 
-    - name: ניסיון העתקת הקובץ עם net use + copy (כולל echo)
-  win_shell: |
-    echo === התחלת בדיקה ===
-    net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
-    echo ERRORLEVEL after net use: %ERRORLEVEL%
-    if %ERRORLEVEL%==0 (
-      echo === מיפוי הצליח ===
-      copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\test_copy.exe"
-      echo קובץ הועתק בהצלחה
-    ) else (
-      echo ❌ net use נכשל
-      exit /b 1
-    )
+    - name: ניסיון העתקת הקובץ עם לוגים מלאים
+      win_shell: |
+        echo === התחלת בדיקה ===
+        net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
+        echo ERRORLEVEL after net use: %ERRORLEVEL%
+        if %ERRORLEVEL%==0 (
+          echo === מיפוי הצליח ===
+          copy "{{ share_path }}\{{ product_folder }}\{{ setup_file }}" "{{ dest_folder }}\test_copy.exe"
+          echo קובץ הועתק בהצלחה
+        ) else (
+          echo ❌ net use נכשל
+          exit /b 1
+        )
       args:
         executable: cmd
       register: copy_debug
