@@ -1,0 +1,32 @@
+---
+- name: Upgrade Office to 2024
+  hosts: all
+  gather_facts: no
+  tasks:
+
+    - name: Create Office install directory
+      win_file:
+        path: C:\Office2024
+        state: directory
+
+    - name: Download Office setup.exe
+      win_get_url:
+        url: "http://132.72.48.201/installations/Microsoft Office LTSC 2024/setup.exe"
+        dest: "C:\\Office2024\\setup.exe"
+        force: yes
+
+    - name: Download Office configuration.xml
+      win_get_url:
+        url: "http://132.72.48.201/installations/Microsoft Office LTSC 2024/Office2024.xml"
+        dest: "C:\\Office2024\\configuration.xml"
+        force: yes
+
+    - name: Run Office 2024 setup with XML
+      win_command: C:\Office2024\setup.exe /configure C:\Office2024\configuration.xml
+      args:
+        chdir: C:\Office2024
+      register: office_install
+
+    - name: Show install result
+      debug:
+        var: office_install.stdout
