@@ -6,7 +6,7 @@
   vars:
     share_path: '\\132.72.48.201\installations'
     product_folder: 'Microsoft Office LTSC 2024'
-    dest_folder: 'C:\Office2024'
+    dest_folder: 'C:\\Office2024'
     setup_file: 'setup.exe'
     config_file: 'Office2024.xml'
 
@@ -30,7 +30,7 @@
         executable: cmd
       no_log: true
 
-    - name: מיפוי שיתוף והעתקת קובץ ההתקנה XML
+    - name: מיפוי שיתוף והעתקת קובץ ההגדרות XML
       win_shell: |
         net use {{ share_path }} /user:auth\{{ ansible_user }} "{{ ansible_password }}"
         if %ERRORLEVEL%==0 (
@@ -43,14 +43,14 @@
         executable: cmd
       no_log: true
 
-    - name: בדיקה שהקובץ Office2024.xml קיים
+    - name: בדיקה אם Office2024.xml הועתק
       win_stat:
-        path: "{{ dest_folder }}\{{ config_file }}"
+        path: "{{ dest_folder }}\\{{ config_file }}"
       register: xml_status
 
-    - name: הפסקה במקרה של העתקה כושלת
+    - name: הפסקה אם הקובץ לא הועתק
       fail:
-        msg: "❌ הקובץ {{ config_file }} לא הועתק. בדוק את ההרשאות או הנתיב."
+        msg: "❌ הקובץ {{ config_file }} לא הועתק. בדוק הרשאות ונתיב."
       when: not xml_status.stat.exists
 
     - name: הרצת setup.exe עם קובץ ההגדרות
@@ -59,6 +59,7 @@
         chdir: "{{ dest_folder }}"
       register: install_result
 
-    - name: תצוגת תוצאה
+    - name: הצגת תוצאת התקנה
       debug:
-        msg: "✔ התקנת Office 2024 הסתיימה."
+        var: install_result.stdout
+
